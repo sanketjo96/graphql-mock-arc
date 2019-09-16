@@ -25,7 +25,6 @@ const start = async () => {
 
         const server = new GraphQLServer({
             schema,
-            middlewares: 
             context: req => ({
                 ...req,
                 prisma

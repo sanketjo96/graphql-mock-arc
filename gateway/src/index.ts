@@ -1,7 +1,7 @@
 import { GraphQLServer } from 'graphql-yoga';
 import { mergeSchemas } from 'graphql-tools';
-import { getAuthSchema } from '../../getway/src/schemas/auth';
-import { getAppSchema } from '../../getway/src/schemas/app';
+import { getAuthSchema } from './schemas/auth';
+import { getAppSchema } from './schemas/app';
 
 const start = async () => {
     try {
