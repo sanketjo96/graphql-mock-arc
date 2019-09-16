@@ -1,0 +1,7 @@
+type AuthPayLoad {
+    token: String
+}
+
+type Query {
+    login(email: String!, password: String!): AuthPayLoad
+}

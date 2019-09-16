@@ -1,0 +1,21 @@
+type Author {
+  id: ID! @unique
+  name: String!
+  blog: Blog @relation(name: "AuthorToBlog", onDelete: CASCADE) 
+  comments: [Comment!]! @relation(name: "AuthorToComment", onDelete: CASCADE)
+}
+
+type Blog {
+  id: ID! @unique
+  name: String
+  owner: Author @relation(name: "BlogToAuthor", onDelete: SET_NULL)
+  comments: [Comment!]! @relation(name: "BlogToComment", onDelete: CASCADE)
+}
+
+type Comment {
+  id: ID! @unique
+  description: String
+  blog: Blog @relation(name: "CommentToBlog", onDelete: SET_NULL)
+  owner: Author @relation(name: "CommentToAuthor", onDelete: SET_NULL)
+}
+

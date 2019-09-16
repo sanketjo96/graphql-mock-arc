@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "target": "es5",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist/src",
+    "lib": [
+      "esnext", 
+      "dom",
+      "ES2015"
+    ]
+  },
+  "exclude": [
+    "centric8-data-import",
+    "migration"
+  ]
+}

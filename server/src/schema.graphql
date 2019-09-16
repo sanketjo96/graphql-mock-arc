@@ -1,0 +1,7 @@
+# import * from './generated/prisma.graphql'
+
+type Query {
+    author(name: String!): Author
+    authors: [Author]
+    comments: [Comment]
+}
