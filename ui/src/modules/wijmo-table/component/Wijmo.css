@@ -1,7 +1,33 @@
 .wj-flexgrid {
   max-height: 450px !important;
-  margin: 2rem;
+  margin-top: 10px;
+  width: 100%;
   margin-bottom: 0;
+}
+
+.wj-cell.wj-header {
+  background: #eeeeee;
+  text-transform: uppercase;
+  font-size:13px;
+  line-height:1.5;
+  vertical-align: middle;
+  text-align: center;
+  padding:6px 4px;
+}
+
+.wj-cells .wj-cell.wj-state-selected {
+  background: #e1e1e1;
+  color: black;
+}
+
+.wj-cells .wj-cell.wj-state-multi-selected {
+  background: #e1e1e1;
+  color: black;
+}
+
+.wj-cell.product-cell {
+  padding: 25px !important;
+  vertical-align: top;
 }
 
 .column-picker {
@@ -14,7 +40,7 @@
 
 .column-picker-icon {
   cursor: pointer;
-  margin: 2rem 0 0 1rem;
+  margin: 2rem 0 1rem 0rem;
 }
 
 .column-picker-div {

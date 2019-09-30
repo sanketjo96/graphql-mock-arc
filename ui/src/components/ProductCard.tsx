@@ -17,7 +17,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     card: {
-      maxWidth: 345,
+      maxWidth: 300,
     },
     media: {
       height: 0,
@@ -55,7 +55,7 @@ export default function RecipeReviewCard(props: any) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={props.item.data  && props.item.data}
+        title={props.item && props.item.name}
         subheader="September 14, 2016"
       />
       <CardMedia

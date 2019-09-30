@@ -1,172 +1,183 @@
 import * as React from 'react';
 import * as wjcCore from "@grapecity/wijmo";
-import * as wjcGrid from "@grapecity/wijmo.react.grid";
+import { FlexGrid, FormatItemEventArgs } from '@grapecity/wijmo.grid';
+import { FlexGrid as WijmoGrid, FlexGridColumn } from '@grapecity/wijmo.react.grid';
+
+import RecipeReviewCard from '../../../components/ProductCard';
+import { products, updateProduct } from '../graphql/variables';
+import { useApolloClient } from '@apollo/react-hooks';
+import { GET_COLLECTION } from '../graphql/collection';
+import { UPDATE_PRODUCT } from '../graphql/updateProduct';
+import { renderReactIntoGridCell } from './wijmoHelper';
 import '@grapecity/wijmo.styles/wijmo.css';
 import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
 import './Wijmo.css';
-
-import { categories } from '../data/categories';
-import { lazyData } from '../data/lazy';
 import ColToggler from './ColToggler';
-import { renderReactIntoGridCell } from './wijmoHelper';
-import RecipeReviewCard from '../../../components/ProductCard';
-import { FlexGrid, FormatItemEventArgs } from '@grapecity/wijmo.grid';
-import { CollectionView } from '@grapecity/wijmo';
+
+const CHILDDEPTH = 3;
 const uuidv4 = require('uuid/v4');
 
-export interface WijmoTableTableProps {
+export interface WijmoTableProps {
+    data: Array<any>
     cols: Array<any>
 }
 
-export interface WijmoTableTableState {
-    data: CollectionView
-}
+const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
+    const nodeDicts = new Map<String, HTMLElement>();
+    const client = useApolloClient();
+    let columnPicker: any;
 
-export class WijmoTable extends React.Component<WijmoTableTableProps, WijmoTableTableState> {
-    private grid: any;
-    private columnPicker: any;
-    private nodeDicts = new Map<String, HTMLElement>();
-
-    constructor(props: WijmoTableTableProps) {
-        super(props);
-        this.state = {
-            data: new wjcCore.CollectionView(categories.tableData)
-        };
-    }
-
-    componentDidMount() {
-        this.grid.collapseGroupsToLevel(0);
-        if (this.grid && this.columnPicker) {
-            this.columnPicker.itemsSource = this.grid.columns;
-            this.columnPicker.checkedMemberPath = 'visible';
-            this.columnPicker.displayMemberPath = 'header';
-            this.columnPicker.lostFocus.addHandler(() => {
-                wjcCore.hidePopup(this.columnPicker.hostElement);
+    const initialGrid = (flexgrid: FlexGrid) => {
+        let divs = document.getElementsByTagName('div');
+        divs[divs.length - 1].remove();
+        flexgrid.collapseGroupsToLevel(0);
+        if (flexgrid && columnPicker) {
+            columnPicker.itemsSource = flexgrid.columns.filter((col: any) => col.binding !== 'name');
+            columnPicker.checkedMemberPath = 'visible';
+            columnPicker.displayMemberPath = 'header';
+            columnPicker.lostFocus.addHandler(() => {
+                wjcCore.hidePopup(columnPicker.hostElement);
             });
         }
     }
 
-    initialGrid = (grid: FlexGrid) => {
-        this.grid = grid;
-
-        this.grid.formatItem.addHandler((grid: any, e: any) => {
-            const { row, col } = e;
-            const binding = grid.columns[e.col].binding;
-            const item = grid.rows[e.row].dataItem;
-            if (
-                item
-                && binding === 'name'
-                && item.name
-                && item.name.data
-
-            ) {
-                grid.rows[e.row].height = 350;
-                grid.rows[e.row].isReadOnly = false;
-                renderReactIntoGridCell(
-                    e.cell,
-                    `${binding}-${row}-${col}`,
-                    <RecipeReviewCard item={item.name} />,
-                    this.nodeDicts
-                )
-            }
-        });
+    const initializedPicker = (picker: any) => {
+        columnPicker = picker;
     }
 
-    toggle = (e: any) => {
-        wjcCore.showPopup(this.columnPicker.hostElement, e.target, false, true, false);
-        this.columnPicker.focus();
+    const toggle = (e: any) => {
+        wjcCore.showPopup(columnPicker.hostElement, e.target, false, true, false);
+        columnPicker.focus();
         e.preventDefault();
     }
 
-    onGroupCollapsedChanged = (grid: FlexGrid, e: FormatItemEventArgs) => {
-        const rowObj = grid.rows[e.row];
+
+    const onGroupCollapsedChanged = async (flexgrid: FlexGrid, e: FormatItemEventArgs) => {
+        const rowObj = flexgrid.rows[e.row];
         const item = rowObj.dataItem;
-        const { row } = e;
 
-        // let rc = this.grid.cells.getCellBoundingRect(row, 0, true);
-        // this.grid.scrollPosition = new wjcCore.Point(this.grid.scrollPosition.x, -rc.top);
+        // Can't lazy load while updating rows
+        if (flexgrid.rows.isUpdating) {
+            rowObj.isCollapsed = true;
+            return;
+        }
 
-        // did we just expand a node with a dummy child?
-        if (!rowObj.isCollapsed && item.children.length === 1 && item.children[0].lazyData) {
-            // can't lazy load while updating rows
-            if (grid.rows.isUpdating) {
-                rowObj.isCollapsed = true;
-                return;
+        // Did we just expand a node with a dummy child?
+        if (
+            !rowObj.isCollapsed
+            && item.children.length
+            && item.children[0].leaf
+        ) {
+
+            let rowIndex = e.row;
+            let currentRow = flexgrid.rows[rowIndex];
+            let childLevel = CHILDDEPTH;
+            const pathToClickedRow = [];
+            while (currentRow && currentRow.level >= 0) {
+                if (currentRow.level < childLevel) {
+                    pathToClickedRow.unshift(currentRow.dataItem.name);
+                    childLevel = currentRow.level;
+                }
+                currentRow = flexgrid.rows[--rowIndex];
             }
 
-            // DATA FETCHING
-            setTimeout(() => {
-                // replace the dummy child with actual nodes
-                const nextType = item.children[0].type;
-                item.children.length = 0;
-                item.children = lazyData[nextType];
+            products.where.product.AND[0].attributes_some.strVal = pathToClickedRow[0];
+            products.where.product.AND[1].attributes_some.strVal = pathToClickedRow[1];
+            products.where.product.AND[2].attributes_some.strVal = pathToClickedRow[2];
+            const data = await client.query({
+                query: GET_COLLECTION,
+                variables: products
+            });
 
-                // refresh the view
-                grid.collectionView.refresh();
-                // collapse the new item's child items
-                for (let i = rowObj.index + 1; i < grid.rows.length; i++) {
-                    let childRow = grid.rows[i];
-                    if (childRow.level <= rowObj.level) {
-                        break;
-                    }
-                    childRow.isCollapsed = true;
-                }
-            }, 500)
+            if (data) {
+                item.children.length = 0;
+                const newProduct = [{
+                    type: 'product',
+                    ...data.data.buyingSessionProductsConnection.edges[0].node.product
+                }]
+                item.children = newProduct;
+                flexgrid.collectionView.refresh();
+            }
         }
     }
 
-    initializedPicker = (picker: any) => {
-        this.columnPicker = picker;
+    const cellEditEnding = async (grid: FlexGrid, e: FormatItemEventArgs) => {
+        const oldVal = grid.getCellData(e.row, e.col, false);
+        const newVal = grid.activeEditor.value;
+        try {
+            const data = await client.mutate({
+                mutation: UPDATE_PRODUCT,
+                variables: updateProduct
+            });
+            if (data) {
+                grid.setCellData(e.row, e.col, newVal)
+            }
+        } catch (e) {
+            grid.setCellData(e.row, e.col, oldVal)
+        }
     }
 
-    cellEditEnding = (grid: FlexGrid, e: FormatItemEventArgs) => {
-        // get old and new values
-        const flex = grid;
-        const oldVal = flex.getCellData(e.row, e.col, false);
-        const newVal = flex.activeEditor.value;
-        e.cancel = true;
-
-        setTimeout(() => {
-            flex.setCellData(e.row, e.col, newVal)
-        }, 1000);
+    const formatItem = (grid: FlexGrid, e: FormatItemEventArgs) => {
+        const { row, col } = e;
+        const binding = grid.columns[e.col].binding;
+        const item = grid.rows[e.row].dataItem;
+        if (
+            item
+            && binding === 'name'
+            && item.type
+            && item.type.__typename === 'ProductType'
+        ) {
+            grid.rows[e.row].height = 420;
+            grid.rows[e.row].isReadOnly = false;
+            wjcCore.addClass(e.cell, 'product-cell');
+            renderReactIntoGridCell(
+                e.cell,
+                `${binding}-${row}-${col}`,
+                <RecipeReviewCard item={item} />,
+                nodeDicts
+            )
+        }
     }
 
-    render() {
-        let dynamicColumns = this.props.cols.map((col: any, i: number) => {
-            return <wjcGrid.FlexGridColumn
-                key={uuidv4()}
-                isReadOnly={!!col.isReadOnly}
-                allowDragging={false}
-                allowResizing={!!col.allowResizing}
-                width={col.width && col.width}
-                minWidth={col.minWidth}
-                maxWidth={col.maxWidth && col.maxWidth}
-                header={col.header}
-                binding={col.binding}
-            />;
-        });
-        return (
-            <div className="container-fluid">
-                <ColToggler
-                    initListBox={this.initializedPicker}
-                    toggle={this.toggle}
-                >
-                </ColToggler>
-                <wjcGrid.FlexGrid
-                    selectionMode='Row'
-                    stickyHeaders={true}
-                    frozenColumns={2}
-                    itemsSource={this.state.data}
-                    headersVisibility="Column"
-                    groupCollapsedChanged={this.onGroupCollapsedChanged}
-                    initialized={this.initialGrid}
-                    childItemsPath="children"
-                    cellEditEnding={this.cellEditEnding}
-                >
-                    {dynamicColumns}
-                </wjcGrid.FlexGrid>
-            </div>
-        )
-    }
+    let dynamicColumns = props.cols.map((col: any, i: number) => {
+        return <FlexGridColumn
+            key={uuidv4()}
+            cssClass={col.cssClass}
+            isReadOnly={!!col.isReadOnly}
+            allowDragging={false}
+            allowResizing={!!col.allowResizing}
+            width={col.width && col.width}
+            minWidth={col.minWidth}
+            maxWidth={col.maxWidth && col.maxWidth}
+            header={col.header}
+            binding={col.binding}
+        />;
+    });
+
+    return (
+        <div className="container-fluid">
+            <ColToggler
+                initListBox={initializedPicker}
+                toggle={toggle}
+            >
+            </ColToggler>
+            <WijmoGrid
+                selectionMode='Row'
+                stickyHeaders={true}
+                frozenColumns={2}
+                itemsSource={props.data}
+                headersVisibility="Column"
+                columns={props.cols}
+                groupCollapsedChanged={onGroupCollapsedChanged}
+                initialized={initialGrid}
+                childItemsPath="children"
+                formatItem={formatItem}
+                cellEditEnding={cellEditEnding}
+            >
+                {dynamicColumns}
+            </WijmoGrid>
+        </div>
+    );
 }
 
+export default WijmoTable;
