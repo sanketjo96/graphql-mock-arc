@@ -4,6 +4,7 @@ import 'primereact/resources/themes/nova-light/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import TableContainer from './modules/prime-treetable/component/Container';
+import { ToastContainer, toast } from 'react-toastify';
 import WijmoTableContainer from './modules/wijmo-table/component/WijmoContainer';
 
 import { ApolloClient } from 'apollo-client'
@@ -11,6 +12,9 @@ import { createHttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { ApolloProvider } from '@apollo/react-hooks';
 import Test from './modules/hooksDemo/TestCompo';
+import 'react-toastify/dist/ReactToastify.css';
+
+import './App.css'
 
 const httpLink = createHttpLink({
   uri: 'http://giv-sales-board-dev.centricsoftware.com/buying-board-api-gateway/',
@@ -25,16 +29,23 @@ const client = new ApolloClient({
   connectToDevTools: true
 });
 
+toast.configure({
+  className: 'black-background',
+  bodyClassName: "grow-font-size",
+  progressClassName: 'fancy-progress-bar'
+});
+
 const App: React.FC = () => {
   return (
     <div className="App">
       <ApolloProvider client={client}>
         <Router>
           <div>
-            <Route exact path="/prime" component={Test} />
+            <Route exact path="/prime" component={TableContainer} />
             <Route exact path="/" component={WijmoTableContainer} />
           </div>
         </Router>
+        <ToastContainer />
       </ApolloProvider>
     </div>
   );

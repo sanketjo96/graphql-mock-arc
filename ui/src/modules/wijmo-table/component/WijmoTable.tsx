@@ -11,47 +11,48 @@ import { UPDATE_PRODUCT } from '../graphql/updateProduct';
 import { renderReactIntoGridCell } from './wijmoHelper';
 import '@grapecity/wijmo.styles/wijmo.css';
 import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
-import './Wijmo.css';
-import ColToggler from './ColToggler';
+import {toast } from 'react-toastify';
 
-const CHILDDEPTH = 3;
 const uuidv4 = require('uuid/v4');
 
 export interface WijmoTableProps {
     data: Array<any>
     cols: Array<any>
+    initialGrid: Function
+}
+
+const getPathToRow = (grid: FlexGrid, currentRow: any, rowIndex: number, childLevel: number): Array<string> => {
+    const pathToClickedRow = [];
+    while (currentRow && currentRow.level >= 0) {
+        if (currentRow.level < childLevel) {
+            pathToClickedRow.unshift(currentRow.dataItem.name);
+            childLevel = currentRow.level;
+        }
+        currentRow = grid.rows[--rowIndex];
+    }
+    return pathToClickedRow;
 }
 
 const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const nodeDicts = new Map<String, HTMLElement>();
     const client = useApolloClient();
-    let columnPicker: any;
 
+    /**
+     * Tiggres on grid initiualization
+     * @param flexgrid 
+     */
     const initialGrid = (flexgrid: FlexGrid) => {
         let divs = document.getElementsByTagName('div');
         divs[divs.length - 1].remove();
-        flexgrid.collapseGroupsToLevel(0);
-        if (flexgrid && columnPicker) {
-            columnPicker.itemsSource = flexgrid.columns.filter((col: any) => col.binding !== 'name');
-            columnPicker.checkedMemberPath = 'visible';
-            columnPicker.displayMemberPath = 'header';
-            columnPicker.lostFocus.addHandler(() => {
-                wjcCore.hidePopup(columnPicker.hostElement);
-            });
-        }
+        flexgrid.collapseGroupsToLevel(1);
+        props.initialGrid(flexgrid);
     }
 
-    const initializedPicker = (picker: any) => {
-        columnPicker = picker;
-    }
-
-    const toggle = (e: any) => {
-        wjcCore.showPopup(columnPicker.hostElement, e.target, false, true, false);
-        columnPicker.focus();
-        e.preventDefault();
-    }
-
-
+    /**
+     * Triggers on every row expand
+     * @param flexgrid - Grid referance
+     * @param e - Ref to cliked row event
+     */
     const onGroupCollapsedChanged = async (flexgrid: FlexGrid, e: FormatItemEventArgs) => {
         const rowObj = flexgrid.rows[e.row];
         const item = rowObj.dataItem;
@@ -71,16 +72,10 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
 
             let rowIndex = e.row;
             let currentRow = flexgrid.rows[rowIndex];
-            let childLevel = CHILDDEPTH;
-            const pathToClickedRow = [];
-            while (currentRow && currentRow.level >= 0) {
-                if (currentRow.level < childLevel) {
-                    pathToClickedRow.unshift(currentRow.dataItem.name);
-                    childLevel = currentRow.level;
-                }
-                currentRow = flexgrid.rows[--rowIndex];
-            }
-
+            let childLevel = currentRow.level + 1;
+            let pathToClickedRow = getPathToRow(flexgrid, currentRow, rowIndex, childLevel);
+        
+            // Fetch the product data
             products.where.product.AND[0].attributes_some.strVal = pathToClickedRow[0];
             products.where.product.AND[1].attributes_some.strVal = pathToClickedRow[1];
             products.where.product.AND[2].attributes_some.strVal = pathToClickedRow[2];
@@ -89,6 +84,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                 variables: products
             });
 
+            // Attach the fetched product to appropriate parent.
             if (data) {
                 item.children.length = 0;
                 const newProduct = [{
@@ -101,6 +97,11 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         }
     }
 
+    /**
+     * Triggers on cell editting
+     * @param grid 
+     * @param e 
+     */
     const cellEditEnding = async (grid: FlexGrid, e: FormatItemEventArgs) => {
         const oldVal = grid.getCellData(e.row, e.col, false);
         const newVal = grid.activeEditor.value;
@@ -110,21 +111,31 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                 variables: updateProduct
             });
             if (data) {
-                grid.setCellData(e.row, e.col, newVal)
+                grid.setCellData(e.row, e.col, newVal);
+                toast.success("Updates are successful!!")
             }
         } catch (e) {
-            grid.setCellData(e.row, e.col, oldVal)
+            grid.setCellData(e.row, e.col, oldVal);
+            toast.success("Updates are Failed!!")
         }
     }
 
+    /**
+     * Triggers on almost every change in grid
+     * @param grid 
+     * @param e 
+     */
     const formatItem = (grid: FlexGrid, e: FormatItemEventArgs) => {
         const { row, col } = e;
         const binding = grid.columns[e.col].binding;
         const item = grid.rows[e.row].dataItem;
+        
+        // Add product card if we are expanding
+        // this is the leaf row/node
         if (
             item
-            && binding === 'name'
             && item.type
+            && binding === 'name'
             && item.type.__typename === 'ProductType'
         ) {
             grid.rows[e.row].height = 420;
@@ -155,28 +166,21 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     });
 
     return (
-        <div className="container-fluid">
-            <ColToggler
-                initListBox={initializedPicker}
-                toggle={toggle}
-            >
-            </ColToggler>
-            <WijmoGrid
-                selectionMode='Row'
-                stickyHeaders={true}
-                frozenColumns={2}
-                itemsSource={props.data}
-                headersVisibility="Column"
-                columns={props.cols}
-                groupCollapsedChanged={onGroupCollapsedChanged}
-                initialized={initialGrid}
-                childItemsPath="children"
-                formatItem={formatItem}
-                cellEditEnding={cellEditEnding}
-            >
-                {dynamicColumns}
-            </WijmoGrid>
-        </div>
+        <WijmoGrid
+            selectionMode='Row'
+            stickyHeaders={true}
+            frozenColumns={2}
+            itemsSource={props.data}
+            headersVisibility="Column"
+            columns={props.cols}
+            groupCollapsedChanged={onGroupCollapsedChanged}
+            initialized={initialGrid}
+            childItemsPath="children"
+            formatItem={formatItem}
+            cellEditEnding={cellEditEnding}
+        >
+            {dynamicColumns}
+        </WijmoGrid>
     );
 }
 

@@ -6,14 +6,27 @@
 }
 
 .wj-cell.wj-header {
-  background: #eeeeee;
+  background: #F5F5F5;
   text-transform: uppercase;
-  font-size:13px;
-  line-height:1.5;
+  font-size: 13px;
+  line-height: 1.5;
   vertical-align: middle;
   text-align: center;
-  padding:6px 4px;
+  padding: 6px 4px;
 }
+
+/*
+.wj-cell.wj-group {
+  border: none !important;
+  border-bottom: 1px solid #e1e1e1 !important;
+  background: white !important;
+}
+
+.wj-cell.wj-frozen-col {
+  box-shadow: 10px 0 5px -2px #888;
+  border-right: 1px solid #e1e1e1 !important;
+}
+*/
 
 .wj-cells .wj-cell.wj-state-selected {
   background: #e1e1e1;
