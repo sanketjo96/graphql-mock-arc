@@ -15,10 +15,11 @@
   padding: 6px 4px;
 }
 
-/*
+
 .wj-cell.wj-group {
   border: none !important;
   border-bottom: 1px solid #e1e1e1 !important;
+  border-right: 1px solid #e1e1e1 !important;
   background: white !important;
 }
 
@@ -26,7 +27,7 @@
   box-shadow: 10px 0 5px -2px #888;
   border-right: 1px solid #e1e1e1 !important;
 }
-*/
+
 
 .wj-cells .wj-cell.wj-state-selected {
   background: #e1e1e1;

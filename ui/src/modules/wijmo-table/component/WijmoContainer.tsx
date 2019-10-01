@@ -6,6 +6,7 @@ import { FlexGrid } from '@grapecity/wijmo.grid';
 import * as wjcCore from "@grapecity/wijmo";
 import ColToggler from './ColToggler';
 import './Wijmo.css';
+import LinearIndeterminate from '../../../components/Progress';
 
 export const cols: Array<any> = [
     {
@@ -104,6 +105,7 @@ const WijmoTableContainer = () => {
 
     return (
         <div className="container-fluid">
+            <LinearIndeterminate></LinearIndeterminate>
             <ColToggler
                 initListBox={initializedPicker}
                 toggle={toggle}

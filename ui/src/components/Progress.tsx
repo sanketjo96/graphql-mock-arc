@@ -1,0 +1,26 @@
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { useObserver } from "mobx-react-lite"
+import { TreeGridStoreProgress, Progress } from '../modules/wijmo-table/store/progressStore';
+
+const useStyles = makeStyles({
+  root: {
+    flexGrow: 1,
+  },
+});
+
+const LinearIndeterminate: any  = () => {
+  const classes = useStyles();
+  const progress: TreeGridStoreProgress = Progress;
+
+  return useObserver(() => {
+    return (
+        <div className={classes.root}>
+          { progress.isProgressing && <LinearProgress />}
+        </div>
+      );
+  })
+}
+
+export default LinearIndeterminate

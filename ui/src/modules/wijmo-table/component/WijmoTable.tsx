@@ -9,9 +9,10 @@ import { useApolloClient } from '@apollo/react-hooks';
 import { GET_COLLECTION } from '../graphql/collection';
 import { UPDATE_PRODUCT } from '../graphql/updateProduct';
 import { renderReactIntoGridCell } from './wijmoHelper';
+import { TreeGridStoreProgress, Progress } from '../store/progressStore';
 import '@grapecity/wijmo.styles/wijmo.css';
 import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
-import {toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const uuidv4 = require('uuid/v4');
 
@@ -36,7 +37,7 @@ const getPathToRow = (grid: FlexGrid, currentRow: any, rowIndex: number, childLe
 const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const nodeDicts = new Map<String, HTMLElement>();
     const client = useApolloClient();
-
+    const progress: TreeGridStoreProgress = Progress;
     /**
      * Tiggres on grid initiualization
      * @param flexgrid 
@@ -56,7 +57,6 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const onGroupCollapsedChanged = async (flexgrid: FlexGrid, e: FormatItemEventArgs) => {
         const rowObj = flexgrid.rows[e.row];
         const item = rowObj.dataItem;
-
         // Can't lazy load while updating rows
         if (flexgrid.rows.isUpdating) {
             rowObj.isCollapsed = true;
@@ -71,14 +71,16 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         ) {
 
             let rowIndex = e.row;
+
             let currentRow = flexgrid.rows[rowIndex];
             let childLevel = currentRow.level + 1;
             let pathToClickedRow = getPathToRow(flexgrid, currentRow, rowIndex, childLevel);
-        
+
             // Fetch the product data
             products.where.product.AND[0].attributes_some.strVal = pathToClickedRow[0];
             products.where.product.AND[1].attributes_some.strVal = pathToClickedRow[1];
             products.where.product.AND[2].attributes_some.strVal = pathToClickedRow[2];
+            progress.setProgress(true);
             const data = await client.query({
                 query: GET_COLLECTION,
                 variables: products
@@ -91,9 +93,21 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                     type: 'product',
                     ...data.data.buyingSessionProductsConnection.edges[0].node.product
                 }]
-                item.children = newProduct;
+                item.children = newProduct.concat(newProduct);
                 flexgrid.collectionView.refresh();
+                // flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0)
+
+                setTimeout(() => {
+                    flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0)
+                    let rc = flexgrid.cells.getCellBoundingRect(e.row, 0, true);
+                    flexgrid.scrollPosition = new wjcCore.Point(flexgrid.scrollPosition.x, -rc.top);
+                }, 100)
+                progress.setProgress(false);
             }
+        } else {
+            flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0);
+            let rc = flexgrid.cells.getCellBoundingRect(7, 0, true);
+            flexgrid.scrollPosition = new wjcCore.Point(flexgrid.scrollPosition.x, -rc.top);
         }
     }
 
@@ -105,6 +119,8 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const cellEditEnding = async (grid: FlexGrid, e: FormatItemEventArgs) => {
         const oldVal = grid.getCellData(e.row, e.col, false);
         const newVal = grid.activeEditor.value;
+        if (!newVal) return;
+
         try {
             const data = await client.mutate({
                 mutation: UPDATE_PRODUCT,
@@ -129,7 +145,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         const { row, col } = e;
         const binding = grid.columns[e.col].binding;
         const item = grid.rows[e.row].dataItem;
-        
+
         // Add product card if we are expanding
         // this is the leaf row/node
         if (
