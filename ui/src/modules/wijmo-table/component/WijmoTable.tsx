@@ -93,7 +93,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                     type: 'product',
                     ...data.data.buyingSessionProductsConnection.edges[0].node.product
                 }]
-                item.children = newProduct.concat(newProduct);
+                item.children = newProduct;
                 flexgrid.collectionView.refresh();
                 // flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0)
 
