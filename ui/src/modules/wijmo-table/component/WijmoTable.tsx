@@ -9,35 +9,25 @@ import { useApolloClient } from '@apollo/react-hooks';
 import { GET_COLLECTION } from '../graphql/collection';
 import { UPDATE_PRODUCT } from '../graphql/updateProduct';
 import { renderReactIntoGridCell } from './wijmoHelper';
-import { TreeGridStoreProgress, Progress } from '../store/progressStore';
 import '@grapecity/wijmo.styles/wijmo.css';
 import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
 import { toast } from 'react-toastify';
+import { TreeGridStore, TreeStore } from '../store/store';
 
 const uuidv4 = require('uuid/v4');
 
 export interface WijmoTableProps {
     data: Array<any>
     cols: Array<any>
-    initialGrid: Function
-}
-
-const getPathToRow = (grid: FlexGrid, currentRow: any, rowIndex: number, childLevel: number): Array<string> => {
-    const pathToClickedRow = [];
-    while (currentRow && currentRow.level >= 0) {
-        if (currentRow.level < childLevel) {
-            pathToClickedRow.unshift(currentRow.dataItem.name);
-            childLevel = currentRow.level;
-        }
-        currentRow = grid.rows[--rowIndex];
-    }
-    return pathToClickedRow;
+    initialGrid: Function,
+    freezeRows: number
 }
 
 const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const nodeDicts = new Map<String, HTMLElement>();
+    const store: TreeGridStore = TreeStore;
     const client = useApolloClient();
-    const progress: TreeGridStoreProgress = Progress;
+
     /**
      * Tiggres on grid initiualization
      * @param flexgrid 
@@ -49,67 +39,6 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         props.initialGrid(flexgrid);
     }
 
-    /**
-     * Triggers on every row expand
-     * @param flexgrid - Grid referance
-     * @param e - Ref to cliked row event
-     */
-    const onGroupCollapsedChanged = async (flexgrid: FlexGrid, e: FormatItemEventArgs) => {
-        const rowObj = flexgrid.rows[e.row];
-        const item = rowObj.dataItem;
-        // Can't lazy load while updating rows
-        if (flexgrid.rows.isUpdating) {
-            rowObj.isCollapsed = true;
-            return;
-        }
-
-        // Did we just expand a node with a dummy child?
-        if (
-            !rowObj.isCollapsed
-            && item.children.length
-            && item.children[0].leaf
-        ) {
-
-            let rowIndex = e.row;
-
-            let currentRow = flexgrid.rows[rowIndex];
-            let childLevel = currentRow.level + 1;
-            let pathToClickedRow = getPathToRow(flexgrid, currentRow, rowIndex, childLevel);
-
-            // Fetch the product data
-            products.where.product.AND[0].attributes_some.strVal = pathToClickedRow[0];
-            products.where.product.AND[1].attributes_some.strVal = pathToClickedRow[1];
-            products.where.product.AND[2].attributes_some.strVal = pathToClickedRow[2];
-            progress.setProgress(true);
-            const data = await client.query({
-                query: GET_COLLECTION,
-                variables: products
-            });
-
-            // Attach the fetched product to appropriate parent.
-            if (data) {
-                item.children.length = 0;
-                const newProduct = [{
-                    type: 'product',
-                    ...data.data.buyingSessionProductsConnection.edges[0].node.product
-                }]
-                item.children = newProduct;
-                flexgrid.collectionView.refresh();
-                // flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0)
-
-                setTimeout(() => {
-                    flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0)
-                    let rc = flexgrid.cells.getCellBoundingRect(e.row, 0, true);
-                    flexgrid.scrollPosition = new wjcCore.Point(flexgrid.scrollPosition.x, -rc.top);
-                }, 100)
-                progress.setProgress(false);
-            }
-        } else {
-            flexgrid.scrollIntoView(flexgrid.rows.length - 1, 0);
-            let rc = flexgrid.cells.getCellBoundingRect(7, 0, true);
-            flexgrid.scrollPosition = new wjcCore.Point(flexgrid.scrollPosition.x, -rc.top);
-        }
-    }
 
     /**
      * Triggers on cell editting
@@ -152,7 +81,6 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
             item
             && item.type
             && binding === 'name'
-            && item.type.__typename === 'ProductType'
         ) {
             grid.rows[e.row].height = 420;
             grid.rows[e.row].isReadOnly = false;
@@ -164,6 +92,25 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                 nodeDicts
             )
         }
+    }
+
+    const scrollPositionChanged = (grid: FlexGrid, e: FormatItemEventArgs) => {
+        // if we're close to the bottom, add 20 items
+        if (!store.isProgressing) {
+            console.log(`${grid.viewRange.bottomRow} - ${grid.rows.length}`);
+            if (grid.viewRange.bottomRow >= grid.rows.length - 1) {
+                // store.appendToGridData();
+                store.setNextTreeNode();
+            }
+        }
+    }
+
+    const next = () => {
+        store.setNextTreeNode();
+    }
+
+    const previous = () => {
+        store.setPreviousTreeNode();
     }
 
     let dynamicColumns = props.cols.map((col: any, i: number) => {
@@ -182,21 +129,24 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     });
 
     return (
-        <WijmoGrid
-            selectionMode='Row'
-            stickyHeaders={true}
-            frozenColumns={2}
-            itemsSource={props.data}
-            headersVisibility="Column"
-            columns={props.cols}
-            groupCollapsedChanged={onGroupCollapsedChanged}
-            initialized={initialGrid}
-            childItemsPath="children"
-            formatItem={formatItem}
-            cellEditEnding={cellEditEnding}
-        >
-            {dynamicColumns}
-        </WijmoGrid>
+        <React.Fragment>
+            <button onClick={previous}>Previous</button>
+            <button onClick={next}>Next</button>
+            <WijmoGrid
+                selectionMode='Row'
+                stickyHeaders={true}
+                frozenRows={props.freezeRows}
+                frozenColumns={2}
+                itemsSource={props.data}
+                headersVisibility="Column"
+                initialized={initialGrid}
+                cellEditEnding={cellEditEnding}
+                scrollPositionChanged={scrollPositionChanged}
+            >
+                {dynamicColumns}
+            </WijmoGrid>
+        </React.Fragment>
+
     );
 }
 

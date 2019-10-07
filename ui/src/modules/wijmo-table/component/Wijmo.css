@@ -1,3 +1,21 @@
+.list-view-parent {
+  display: flex;
+  flex-direction: row;
+}
+
+.list-view-parent .list-view-grid {
+  width: 70%;
+  margin-right: 20px;
+}
+
+.list-view-parent .list-view-nav  {
+  width: 30%;
+}
+.list-view-parent .p-tree {
+  width: 100%;
+}
+
+
 .wj-flexgrid {
   max-height: 450px !important;
   margin-top: 10px;
@@ -60,3 +78,4 @@
 .column-picker-div {
   display: none;
 }
+

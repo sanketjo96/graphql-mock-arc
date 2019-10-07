@@ -1,8 +1,8 @@
 export const hierarchyVariable = {
     "buyingSessionWhereInput": {
-        "id": "ck0xfthdhgp7g0793wm97j91m"
+        "id": "ck1bm3a4n3r3o0793049tn8yn"
     },
-    "genderId": "ck0wnredmt4jl0793kg8zjnzq",
+    "genderId": "ck1ar8n7tcog707930uqdpydw",
     "quantityType": "BET",
     "productWhereInput": {
         "OR": [
@@ -11,49 +11,49 @@ export const hierarchyVariable = {
             }
         ],
         "buyingSession": {
-            "id": "ck0xfthdhgp7g0793wm97j91m"
+            "id": "ck1bm3a4n3r3o0793049tn8yn"
         }
     }
 };
 
 export const products = {
-    where: {
-        buyingSession: {
-            "id": "ck0xfthdhgp7g0793wm97j91m"
+    "where": {
+        "buyingSession": {
+            "id": "ck1bm3a4n3r3o0793049tn8yn"
         },
-        product: {
-            AND: [
+        "product": {
+            "AND": [
                 {
-                    attributes_some: {
-                        definition: {
-                            name: "activity"
+                    "attributes_some": {
+                        "definition": {
+                            "name": "activity"
                         },
-                        strVal: "LEATHER GOODS"
+                        "strVal": "LEATHER GOODS"
                     }
                 },
                 {
-                    attributes_some: {
-                        definition: {
-                            name: "family"
+                    "attributes_some": {
+                        "definition": {
+                            "name": "family"
                         },
-                        strVal: "SLG"
+                        "strVal": "LLG"
                     }
                 },
                 {
-                    attributes_some: {
-                        definition: {
-                            name: "line"
+                    "attributes_some": {
+                        "definition": {
+                            "name": "line"
                         },
-                        strVal: "AUTRE"
+                        "strVal": "GV3"
                     }
                 }
             ]
         }
     },
-    limit: 20,
-    skip: 0,
-    userId: "ck0wnq39vt2wp0793qt6cxsnb",
-    zoneIdWhere: null
+    "limit": 20,
+    "skip": 0,
+    "userId": "ck1ar4499cmkl0793hehx7jsk",
+    "zoneIdWhere": null
 };
 
 export const products1 = {

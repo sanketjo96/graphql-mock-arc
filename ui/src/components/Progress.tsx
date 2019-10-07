@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { useObserver } from "mobx-react-lite"
-import { TreeGridStoreProgress, Progress } from '../modules/wijmo-table/store/progressStore';
+import { TreeGridStore, TreeStore } from '../modules/wijmo-table/store/store';
 
 const useStyles = makeStyles({
   root: {
@@ -12,7 +12,7 @@ const useStyles = makeStyles({
 
 const LinearIndeterminate: any  = () => {
   const classes = useStyles();
-  const progress: TreeGridStoreProgress = Progress;
+  const progress: TreeGridStore = TreeStore;
 
   return useObserver(() => {
     return (
