@@ -37,6 +37,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         if (!store.isProgressing) {
             // console.log(`${grid.viewRange.bottomRow} - ${grid.rows.length}`);
             if (grid.viewRange.bottomRow >= grid.rows.length - 1) {
+                store.setSkipChunk();
             }
         }
     }
@@ -79,11 +80,15 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
                     </section>
                     : ''
             }
-            <section id="section04" onClick={next} className="demo">
-                <a href="#section05">
-                    <span></span>
-                </a>
-            </section>
+            {
+                !store.hasNextPage
+                    ? <section id="section04" onClick={next} className="demo">
+                        <a href="#section05">
+                            <span></span>
+                        </a>
+                    </section>
+                    : ''
+            }
             <WijmoGrid
                 selectionMode='Row'
                 stickyHeaders={true}

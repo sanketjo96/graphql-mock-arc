@@ -9,7 +9,11 @@ export class TreeGridStore {
     nodeIndex = 2;
     dfs: Array<any> = [];
     isPreviousPageAvailable = false;
-
+    columnPicker: any;
+    grid: any;
+    hasNextPage = false;
+    
+    @observable skipChunk: number = 0;
     @observable gridData: any = [];
     @observable isProgressing = false;
     @observable stickRows: Array<any> = [];
@@ -37,10 +41,20 @@ export class TreeGridStore {
     }
 
 
-    @action appendToGridData = (newPageData: any) => {
-        this.gridData = this.stickRows.concat(newPageData);
+    @action setGridData = (newPageData: any) => {
+        if (this.skipChunk > 0) {
+            this.gridData = this.gridData.concat(newPageData);
+        } else {
+            this.gridData = this.stickRows.concat(newPageData);
+        }
+
     }
 
+    @action setSkipChunk() {
+        if (this.hasNextPage) {
+            this.skipChunk += 20;
+        }
+    }
 
     initExpand = (data: Array<string>) => {
         for (let item of data) {
@@ -49,6 +63,8 @@ export class TreeGridStore {
     }
 
     setNextTreeNode = () => {
+        this.hasNextPage = false;
+        this.skipChunk = 0;
         if (this.nodeIndex < this.dfs.length) {
             const selectedNode = this.dfs[++this.nodeIndex];
             if (!this.expandedPath[selectedNode]) {

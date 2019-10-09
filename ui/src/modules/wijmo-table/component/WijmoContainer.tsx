@@ -83,8 +83,6 @@ export const cols: Array<any> = [
 const WijmoTableContainer = () => {
     return useObserver(() => {
         const store: TreeGridStore = TreeStore;
-        let columnPicker: any;
-
         const [getProducts, { loading, data: productsData }] = useLazyQuery(GET_COLLECTION);
 
         React.useEffect(() => {
@@ -92,18 +90,21 @@ const WijmoTableContainer = () => {
                 products.where.product.AND[i].attributes_some.strVal = store.stickRows[i].name;
             }
 
+            products.skip = store.skipChunk;
+
             getProducts({
                 variables: products
             });
 
-        }, [store.stickRows]);
+        }, [store.stickRows, store.skipChunk]);
 
         React.useEffect(() => {
             if (productsData
                 && productsData.buyingSessionProductsConnection.edges
                 && productsData.buyingSessionProductsConnection.edges.length
             ) {
-                store.appendToGridData(productsData.buyingSessionProductsConnection.edges.map((edge: any) => {
+                store.hasNextPage = productsData.buyingSessionProductsConnection.pageInfo.hasNextPage;
+                store.setGridData(productsData.buyingSessionProductsConnection.edges.map((edge: any) => {
                     return edge.node.product;
                 }));
                 store.clearProgress();
@@ -111,23 +112,24 @@ const WijmoTableContainer = () => {
         }, [productsData]);
 
         const initializedPicker = (picker: any) => {
-            columnPicker = picker;
+            store.columnPicker = picker;
         }
 
         const initialGrid = (flexgrid: FlexGrid) => {
-            if (flexgrid && columnPicker) {
-                columnPicker.itemsSource = flexgrid.columns.filter((col: any) => col.binding !== 'name');
-                columnPicker.checkedMemberPath = 'visible';
-                columnPicker.displayMemberPath = 'header';
-                columnPicker.lostFocus.addHandler(() => {
-                    wjcCore.hidePopup(columnPicker.hostElement);
+            store.grid = flexgrid;
+            if (store.grid && store.columnPicker) {
+                store.columnPicker.itemsSource = store.grid.columns.filter((col: any) => col.binding !== 'name');
+                store.columnPicker.checkedMemberPath = 'visible';
+                store.columnPicker.displayMemberPath = 'header';
+                store.columnPicker.lostFocus.addHandler(() => {
+                    wjcCore.hidePopup(store.columnPicker.hostElement);
                 });
             }
         }
 
         const toggle = (e: any) => {
-            wjcCore.showPopup(columnPicker.hostElement, e.target, false, true, false);
-            columnPicker.focus();
+            wjcCore.showPopup(store.columnPicker.hostElement, e.target, false, true, false);
+            store.columnPicker.focus();
             e.preventDefault();
         }
 
@@ -139,22 +141,26 @@ const WijmoTableContainer = () => {
         return (
             <div className="container-fluid">
                 <LinearIndeterminate></LinearIndeterminate>
-                <ColToggler
-                    initListBox={initializedPicker}
-                    toggle={toggle}
-                >
-                </ColToggler>
                 <div className="list-view-parent">
                     <div className="list-view-grid">
                         {
-                            store.gridData.length 
-                            ? <WijmoTable
-                                freezeRows={store.stickRows.length}
-                                cols={cols}
-                                data={store.gridData}
-                                initialGrid={initialGrid}
-                            />
-                            : ''
+                            store.gridData.length
+                            ? (
+                                <div>
+                                    <ColToggler
+                                        initListBox={initializedPicker}
+                                        toggle={toggle}
+                                    >
+                                    </ColToggler>
+                                    <WijmoTable
+                                        freezeRows={store.stickRows.length}
+                                        cols={cols}
+                                        data={store.gridData}
+                                        initialGrid={initialGrid}
+                                    />
+                                </div>
+
+                            ) : ''
                         }
                     </div>
                     <div className="list-view-nav">
