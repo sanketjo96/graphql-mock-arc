@@ -9,9 +9,9 @@ export const useProductHierarchy = (options: any = null): [Array<any>, Array<any
   const [categories, setCategories] = useState([]);
   const [dfs, setDFS] = useState([]);
   const { loading, error, data } = useQuery(BUYING_SESSION_PRODUCTS_HIERARCHY_KPIS, options);
-  // Mark the leaf nodes with dummy
-  // child nodes so that wijmo can enable
-  // collapse icon
+  
+  // Return proccessed data
+  // and tree to traverse
   useEffect(() => {
     if (!loading && data) {
       const dfsTraversal: any = [];

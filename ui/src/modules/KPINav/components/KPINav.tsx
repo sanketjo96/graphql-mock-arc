@@ -8,7 +8,7 @@ import {useObserver } from 'mobx-react-lite';
 import { TreeGridStore, TreeStore } from '../../wijmo-table/store/store';
 import './nav.css';
 import { toJS } from 'mobx';
-// const uuidv4 = require('uuid/v4');
+const DEPTH = 3;
 
 const KPINav = () => {
   return useObserver(() => {
@@ -17,13 +17,14 @@ const KPINav = () => {
       variables: hierarchyVariable
     });
   
-    // One time store initialization
+    // One time store initialization per Data
     useEffect(() => {
       store.dfs = dfs;
-      store.initExpand([dfs[0], dfs[1], dfs[2]]);
-      store.setSelectedItem(dfs[2]);
+      store.initExpand(dfs.filter((item, index) => index < DEPTH));
+      store.setSelectedItem(dfs[DEPTH -1]);
     }, [data]);
 
+    // Get rows to stick at top
     useEffect(() => {
       if (store.selectedItem) {
         let stickRows: Array<any> = store.selectedItem.split('=').map((item: string) => {
