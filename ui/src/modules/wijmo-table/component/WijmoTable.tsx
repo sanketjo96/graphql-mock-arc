@@ -37,19 +37,19 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         if (!store.isProgressing) {
             // console.log(`${grid.viewRange.bottomRow} - ${grid.rows.length}`);
             if (grid.viewRange.bottomRow >= grid.rows.length - 1) {
-                store.setNextTreeNode();
-                setTimeout(() => {
-                    grid.scrollPosition = new wjcCore.Point(grid.scrollPosition.x, 0);
-                }, 500)
             }
         }
     }
 
     const next = () => {
+        store.isPreviousPageAvailable = true;
         store.setNextTreeNode();
     }
 
     const previous = () => {
+        if (store.nodeIndex <= 3) {
+            store.isPreviousPageAvailable = false;
+        }
         store.setPreviousTreeNode();
     }
 
@@ -69,9 +69,21 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     });
 
     return (
-        <React.Fragment>
-            <button onClick={previous}>Previous</button>
-            <button onClick={next}>Next</button>
+        <div>
+            {
+                store.isPreviousPageAvailable
+                    ? <section id="section03" onClick={previous} className="demo">
+                        <a href="#section04">
+                            <span></span>
+                        </a>
+                    </section>
+                    : ''
+            }
+            <section id="section04" onClick={next} className="demo">
+                <a href="#section05">
+                    <span></span>
+                </a>
+            </section>
             <WijmoGrid
                 selectionMode='Row'
                 stickyHeaders={true}
@@ -84,7 +96,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
             >
                 {dynamicColumns}
             </WijmoGrid>
-        </React.Fragment>
+        </div>
 
     );
 }

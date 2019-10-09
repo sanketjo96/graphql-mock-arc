@@ -1,13 +1,14 @@
 import { observable, action, toJS } from 'mobx';
 export interface IPageMeta {
     start: number,
-    end: number, 
+    end: number,
     selectedItem: any
 }
 
 export class TreeGridStore {
     nodeIndex = 2;
     dfs: Array<any> = [];
+    isPreviousPageAvailable = false;
 
     @observable gridData: any = [];
     @observable isProgressing = false;
@@ -37,22 +38,7 @@ export class TreeGridStore {
 
 
     @action appendToGridData = (newPageData: any) => {
-        const previousPageData: Array<string> = toJS(this.gridData).filter((item: any, index: number) => {
-            return index > 2
-        });
-
-        // this.gridData = this.stickRows.concat(previousPageData).concat(newPageData);
-        
-        const dataSetLength = newPageData.length;
-        const tempRows = [];
-        if (newPageData.length < 15) {
-            const rowPadding = 15 - dataSetLength;
-            for (let i=0; i<rowPadding; i++) {
-                tempRows.push({});
-            }
-        }
-        
-        this.gridData = this.stickRows.concat(newPageData).concat(tempRows);
+        this.gridData = this.stickRows.concat(newPageData);
     }
 
 
