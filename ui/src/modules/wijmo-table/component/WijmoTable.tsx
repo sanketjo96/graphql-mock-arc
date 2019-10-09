@@ -70,8 +70,6 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
 
     return (
         <React.Fragment>
-            <button onClick={previous}>Previous</button>
-            <button onClick={next}>Next</button>
             <WijmoGrid
                 selectionMode='Row'
                 stickyHeaders={true}
