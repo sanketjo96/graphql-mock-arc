@@ -81,10 +81,12 @@ const WijmoTableContainer = () => {
         const store: TreeGridStore = TreeStore;
         const [getProducts, { loading, data: productsData }] = useLazyQuery(GET_COLLECTION);
 
+        /*
         console.log(store.selectedItem);
         console.log(store.stickyRows);
         console.log(store.skipChunk);
         console.log(toJS(store.gridData));
+        */
         React.useEffect(() => {
             if (store.stickyRows.length) {
                 products.skip = store.skipChunk;

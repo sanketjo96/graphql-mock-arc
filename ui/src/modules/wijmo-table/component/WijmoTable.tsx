@@ -6,7 +6,6 @@ import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
 import { TreeGridStore, TreeStore, IPageMeta } from '../store/store';
 import { renderReactIntoGridCell } from './wijmoHelper';
 import RecipeReviewCard from '../../../components/ProductCard';
-import { SortDescription } from '@grapecity/wijmo';
 
 const uuidv4 = require('uuid/v4');
 
@@ -16,9 +15,9 @@ export interface WijmoTableProps {
     freezeRows: number
 }
 
+const nodeDicts = new Map<String, HTMLElement>();
 const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const store: TreeGridStore = TreeStore;
-    const nodeDicts = new Map<String, HTMLElement>();
 
     /**
      * Tiggres on grid initiualization
@@ -49,9 +48,10 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         if (e.row > 2 && item && binding === 'name') {
             grid.rows[e.row].height = 250;
             grid.rows[e.row].isReadOnly = false;
+            const key = `${binding}-${row}-${col}`;
             renderReactIntoGridCell(
                 e.cell,
-                `${binding}-${row}-${col}-${store.selectedItem}`,
+                key,
                 <RecipeReviewCard item={item} />,
                 nodeDicts
             )

@@ -13,7 +13,7 @@ export const renderReactIntoGridCell = (cell: any, key: string, component: any, 
 
     if (key && nodeDicts && nodeDicts.has(key)) {
         let existingNode = nodeDicts.get(key)
-        if (existingNode && cell.hasChildNodes()) {
+        if (existingNode) {
             ReactDOM.unmountComponentAtNode(existingNode);
             nodeDicts.delete(key)
         }
