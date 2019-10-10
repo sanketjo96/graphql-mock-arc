@@ -8,11 +8,10 @@ import { GET_COLLECTION } from '../graphql/collection';
 import { useLazyQuery } from '@apollo/react-hooks';
 import { useObserver } from 'mobx-react-lite';
 import { TreeGridStore, TreeStore } from '../store/store';
-import { toJS } from 'mobx';
 
 export const cols: Array<any> = [
     {
-        header: "  ",
+        header: "Category",
         binding: "name",
         width: 350,
         cssClass: 'frozen',

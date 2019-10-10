@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     iconbar: {
       position: 'fixed',
-      zIndex: 1000,
+      zIndex: 9,
       right: '0px',
       top: '50%',
     },
@@ -31,10 +31,10 @@ const useStyles = makeStyles((theme: Theme) =>
       color: 'white',
       display: 'block',
       textAlign: 'center',
-      margin: '3px 0px 3px 0px',
       padding: '8px',
       transition: 'all 0.3s ease',
-      fontSize: '13px'
+      fontSize: '13px',
+      textDecoration: 'none',
     },
     hide: {
       display: 'none',

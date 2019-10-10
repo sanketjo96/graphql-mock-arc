@@ -31,11 +31,11 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     }
 
     const scrollPositionChanged = (grid: FlexGrid, e: FormatItemEventArgs) => {
-           // if we're close to the bottom, add 20 items
-           if (
-               store.hasNextPage
-               && grid.viewRange.bottomRow >= grid.rows.length - 1
-            ) {
+        // if we're close to the bottom, add 20 items
+        if (
+            store.hasNextPage
+            && grid.viewRange.bottomRow >= grid.rows.length - 1
+        ) {
             store.hasNextPage = false;
             store.setSkipChunk();
         }
@@ -57,7 +57,7 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
             )
         }
     }
-    
+
     const next = () => {
         if (store.nodeIndex < store.dfs.length) {
             store.setNextTreeNode();
@@ -89,8 +89,16 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const blinkcss = !store.hasNextPage ? 'blink_me' : '';
     return (
         <div>
-            {<a href="#" onClick={previous} className={`previous round`}>&#8249;</a>}
-            {<a href="#" onClick={next} className={`next round ${blinkcss}`}>&#8250;</a>}
+            {
+                <a href="#" onClick={previous} className={`previous round`}>
+                    <i className="fa fa-chevron-up" aria-hidden="true"></i>
+                </a>
+            }
+            {
+                <a href="#" onClick={next} className={`next round ${blinkcss}`}>
+                    <i className="fa fa-chevron-down" aria-hidden="true"></i>
+                </a>
+            }
             <WijmoGrid
                 selectionMode='Row'
                 stickyHeaders={true}

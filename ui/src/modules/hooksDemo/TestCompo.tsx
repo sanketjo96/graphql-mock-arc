@@ -1,28 +1,28 @@
 import * as React from 'react';
-import UseTime from './hook';
-import { useLazyQuery } from '@apollo/react-hooks';
-import { GET_COLLECTION } from '../wijmo-table/graphql/collection';
-import { products1, products } from '../wijmo-table/graphql/variables';
 
-export interface TestProps {
+const ImageGalHookComp = () => {
+    const [index, setIndex] = React.useState(1);
 
-}
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setIndex((index) => {
+                return (index + 1) % 10;
+            });
+        }, 1000);
 
-const Test = () => {
-    const [productQuery, { called, data }] = useLazyQuery(GET_COLLECTION);
+        return () => {
+            clearInterval(interval)
+        };
+    }, [])
+
     return (
-        <React.Fragment>
-            <div>
-                {data && data.buyingSessionProductsConnection.edges[0].node.product.name}
-            </div>
-            <button onClick={() => productQuery({
-                variables: products
-            })}>Timer 1</button>
-            <button onClick={() => productQuery({
-                variables: products1
-            })}>Timer 2</button>
-        </React.Fragment>
+        <div>
+            <img
+                src={`https://picsum.photos/id/${index}/200/300`}
+            >
+            </img>
+        </div>
     );
 }
              
-export default Test;
+export default ImageGalHookComp;

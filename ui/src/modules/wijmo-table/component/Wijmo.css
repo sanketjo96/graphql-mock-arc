@@ -3,7 +3,7 @@
 }
 
 .wj-flexgrid {
-  height: 500px !important;
+  height: 545px !important;
   border: none;
 }
 
@@ -61,36 +61,34 @@
   display: none;
 }
 
-a {
+.round {
   text-decoration: none;
   display: inline-block;
   padding: 8px 16px;
-}
-
-a:hover {
-  background-color: #ddd;
-  color: black;
-}
-
-.previous {
-  margin: 5px;
-  background-color: #f1f1f1;
-  color: black;
-}
-
-.next {
+  position: fixed;
+  z-index: 10;
+  font-size: 12px;
+  border-radius: 20%;
+  right: -2px;
+  margin: 0px;
   background-color: #424242;
   color: white;
 }
 
-.round {
-  border-radius: 50%;
+.previous {
+  top: 45%
 }
 
-.blink_me {
-  animation: blinker 2s linear infinite;
+.next {
+  top: 55%
+}
+
+.blink_me i {
+  animation: blinker 1s linear infinite;
 }
 
 @keyframes blinker {  
-  50% { opacity: 0; }
+  50% { 
+    opacity: 0; 
+  }
 }

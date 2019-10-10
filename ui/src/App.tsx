@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css'
 import PersistentDrawerLeft from './components/Drawer';
+import HookDemo from './modules/hooksDemo';
 
 const httpLink = createHttpLink({
   uri: 'http://giv-sales-board-dev.centricsoftware.com/buying-board-api-gateway/',
@@ -43,6 +44,7 @@ const App: React.FC = () => {
         <Router>
           <div>
             <Route exact path="/" component={PersistentDrawerLeft} />
+            <Route exact path="/hooks" component={HookDemo} />
           </div>
         </Router>
         <ToastContainer />
