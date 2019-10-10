@@ -1,24 +1,24 @@
 import * as React from 'react';
 import { FlexGrid, FormatItemEventArgs } from '@grapecity/wijmo.grid';
 import { FlexGrid as WijmoGrid, FlexGridColumn } from '@grapecity/wijmo.react.grid';
-import * as wjcCore from '@grapecity/wijmo';
-
 import '@grapecity/wijmo.styles/wijmo.css';
 import '@grapecity/wijmo.styles/themes/wijmo.theme.material.css';
 import { TreeGridStore, TreeStore, IPageMeta } from '../store/store';
+import { renderReactIntoGridCell } from './wijmoHelper';
+import RecipeReviewCard from '../../../components/ProductCard';
+import { SortDescription } from '@grapecity/wijmo';
 
 const uuidv4 = require('uuid/v4');
 
 export interface WijmoTableProps {
     data: Array<any>
     cols: Array<any>
-    initialGrid: Function,
     freezeRows: number
 }
 
 const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
     const store: TreeGridStore = TreeStore;
-
+    const nodeDicts = new Map<String, HTMLElement>();
 
     /**
      * Tiggres on grid initiualization
@@ -26,25 +26,42 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
      */
     const initialGrid = (flexgrid: FlexGrid) => {
         let divs = document.getElementsByTagName('div');
+        store.grid = flexgrid;
         divs[divs.length - 1].remove();
         flexgrid.collapseGroupsToLevel(1);
-        props.initialGrid(flexgrid);
     }
 
     const scrollPositionChanged = (grid: FlexGrid, e: FormatItemEventArgs) => {
-        // grid.scrollIntoView(0, -1);
-        // if we're close to the bottom, add 20 items
-        if (!store.isProgressing) {
-            // console.log(`${grid.viewRange.bottomRow} - ${grid.rows.length}`);
-            if (grid.viewRange.bottomRow >= grid.rows.length - 1) {
-                store.setSkipChunk();
-            }
+           // if we're close to the bottom, add 20 items
+           if (
+               store.hasNextPage
+               && grid.viewRange.bottomRow >= grid.rows.length - 1
+            ) {
+            store.hasNextPage = false;
+            store.setSkipChunk();
         }
     }
 
+    const formatItem = (grid: any, e: any) => {
+        const { row, col } = e;
+        const binding = grid.columns[e.col].binding;
+        const item = grid.rows[e.row].dataItem;
+        if (e.row > 2 && item && binding === 'name') {
+            grid.rows[e.row].height = 250;
+            grid.rows[e.row].isReadOnly = false;
+            renderReactIntoGridCell(
+                e.cell,
+                `${binding}-${row}-${col}-${store.selectedItem}`,
+                <RecipeReviewCard item={item} />,
+                nodeDicts
+            )
+        }
+    }
+    
     const next = () => {
-        store.isPreviousPageAvailable = true;
-        store.setNextTreeNode();
+        if (store.nodeIndex < store.dfs.length) {
+            store.setNextTreeNode();
+        }
     }
 
     const previous = () => {
@@ -69,29 +86,15 @@ const WijmoTable: React.SFC<WijmoTableProps> = (props) => {
         />;
     });
 
+    const blinkcss = !store.hasNextPage ? 'blink_me' : '';
     return (
         <div>
-            {
-                store.isPreviousPageAvailable
-                    ? <section id="section03" onClick={previous} className="demo">
-                        <a href="#section04">
-                            <span></span>
-                        </a>
-                    </section>
-                    : ''
-            }
-            {
-                !store.hasNextPage
-                    ? <section id="section04" onClick={next} className="demo">
-                        <a href="#section05">
-                            <span></span>
-                        </a>
-                    </section>
-                    : ''
-            }
+            {<a href="#" onClick={previous} className={`previous round`}>&#8249;</a>}
+            {<a href="#" onClick={next} className={`next round ${blinkcss}`}>&#8250;</a>}
             <WijmoGrid
                 selectionMode='Row'
                 stickyHeaders={true}
+                formatItem={formatItem}
                 frozenRows={props.freezeRows}
                 frozenColumns={2}
                 itemsSource={props.data}

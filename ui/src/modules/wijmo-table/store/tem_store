@@ -1,4 +1,4 @@
-import { observable, action, toJS, computed } from 'mobx';
+import { observable, action, toJS } from 'mobx';
 
 export interface IPageMeta {
     start: number,
@@ -13,12 +13,50 @@ export class TreeGridStore {
     columnPicker: any;
     grid: any;
     hasNextPage = false;
-
-    @observable gridData: any = [];
+    
     @observable skipChunk: number = 0;
+    @observable gridData: any = [];
     @observable isProgressing = false;
-    @observable selectedItem: any = undefined;
+    @observable stickRows: Array<any> = [];
+    @observable selectedItem: any = '';
     @observable expandedPath: any = {}
+
+    @action setStickRows = (rows: Array<any>) => {
+        this.stickRows = rows;
+    }
+
+    @action setSelectedItem = (item: any) => {
+        this.hasNextPage = false;
+        this.skipChunk = 0;
+        this.nodeIndex = this.dfs.indexOf(item) !== -1 ? this.dfs.indexOf(item) : 0;
+        this.selectedItem = item;
+    }
+
+    @action setExpandedPath = (item: any) => {
+        this.expandedPath = Object.assign({}, item);
+    }
+
+    @action setGridData = (newPageData: any) => {
+        if (this.skipChunk === 0) {
+            this.gridData = this.stickRows.concat(newPageData);
+        } else if (this.skipChunk > 0) {
+            this.gridData = this.gridData.concat(newPageData);
+        }
+    }
+
+    @action setProgress = () => {
+        this.isProgressing = true;
+    }
+
+    @action clearProgress = () => {
+        this.isProgressing = false;
+    }
+
+    @action setSkipChunk() {
+        if (this.hasNextPage) {
+            this.skipChunk += 20;
+        }
+    }
 
     initExpand = (data: Array<string>) => {
         for (let item of data) {
@@ -36,45 +74,13 @@ export class TreeGridStore {
             }
             this.setSelectedItem(selectedNode);
         }
+
     }
 
     setPreviousTreeNode = () => {
         if (this.nodeIndex > 2) {
             const selectedNode = this.dfs[--this.nodeIndex];
             this.setSelectedItem(selectedNode);
-        }
-    }
-
-    @computed get stickyRows() {
-        if (!this.selectedItem) return [];
-
-        return this.selectedItem.split('=').map((item: string) => {
-            return {
-                'name': item
-            }
-        });
-    }
-
-    @action setSelectedItem = (item: any) => {
-        this.hasNextPage = false;
-        this.skipChunk = 0;
-        this.nodeIndex = this.dfs.indexOf(item) !== -1 ? this.dfs.indexOf(item) : 0;
-        this.selectedItem = item;
-    }
-
-    @action setSkipChunk() {
-        this.skipChunk += 20;
-    }
-
-    @action setExpandedPath = (item: any) => {
-        this.expandedPath = Object.assign({}, item);
-    }
-
-    @action setGridData = (newPageData: any) => {
-        if (this.skipChunk === 0) {
-            this.gridData = this.stickyRows.concat(newPageData);
-        } else if (this.skipChunk > 0) {
-            this.gridData = this.gridData.concat(newPageData);
         }
     }
 }

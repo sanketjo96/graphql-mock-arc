@@ -1,26 +1,10 @@
-.list-view-parent {
-  display: flex;
-  flex-direction: row;
-}
-
-.list-view-parent .list-view-grid {
-  width: 70%;
-  margin-right: 20px;
-}
-
-.list-view-parent .list-view-nav {
-  width: 30%;
-}
-
-.list-view-parent .p-tree {
-  width: 100%;
+.list-view-grid {
+  width: 96vw;
 }
 
 .wj-flexgrid {
-  max-height: 450px !important;
-  margin-top: 10px;
-  width: 100%;
-  margin-bottom: 0;
+  height: 500px !important;
+  border: none;
 }
 
 .wj-cell.wj-header {
@@ -77,74 +61,36 @@
   display: none;
 }
 
-
-.demo a:hover {
-  opacity: .5;
+a {
+  text-decoration: none;
+  display: inline-block;
+  padding: 8px 16px;
 }
 
-#section04 a {
-  padding-top: 60px;
+a:hover {
+  background-color: #ddd;
+  color: black;
 }
 
-#section04 a span {
-  position: absolute;
-  bottom: 20px;
-  left: 40%;
-  width: 24px;
-  height: 24px;
-  margin-left: -12px;
-  border-left: 1px solid black;
-  border-bottom: 1px solid black;
-  -webkit-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  -webkit-animation: sdb04 2s infinite;
-  animation: sdb04 2s infinite;
-  box-sizing: border-box;
-  z-index: 10;
+.previous {
+  margin: 5px;
+  background-color: #f1f1f1;
+  color: black;
 }
 
-#section03 a {
-  padding-top: 60px;
+.next {
+  background-color: #424242;
+  color: white;
 }
 
-#section03 a span {
-  position: absolute;
-  top: 50px;
-  left: 40%;
-  width: 24px;
-  height: 24px;
-  margin-left: -12px;
-  border-top: 1px solid black;
-  border-right: 1px solid black;
-  -webkit-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  -webkit-animation: sdb04 2s infinite;
-  animation: sdb04 2s infinite;
-  box-sizing: border-box;
-  z-index: 10;
+.round {
+  border-radius: 50%;
 }
 
-@-webkit-keyframes sdb04 {
-  0% {
-    -webkit-transform: rotate(-45deg) translate(0, 0);
-  }
-  20% {
-    -webkit-transform: rotate(-45deg) translate(-10px, 10px);
-  }
-  40% {
-    -webkit-transform: rotate(-45deg) translate(0, 0);
-  }
+.blink_me {
+  animation: blinker 2s linear infinite;
 }
 
-@keyframes sdb04 {
-  0% {
-    transform: rotate(-45deg) translate(0, 0);
-  }
-  20% {
-    transform: rotate(-45deg) translate(-10px, 10px);
-  }
-  40% {
-    transform: rotate(-45deg) translate(0, 0);
-  }
+@keyframes blinker {  
+  50% { opacity: 0; }
 }
-

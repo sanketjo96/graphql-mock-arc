@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -11,13 +13,12 @@ const useStyles = makeStyles({
 });
 
 const LinearIndeterminate: any  = () => {
-  const classes = useStyles();
-  const progress: TreeGridStore = TreeStore;
-
   return useObserver(() => {
+    const classes = useStyles();
+    const store: TreeGridStore = TreeStore;
     return (
         <div className={classes.root}>
-          { progress.isProgressing && <LinearProgress />}
+          { store.isProgressing && <LinearProgress />}
         </div>
       );
   })

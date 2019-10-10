@@ -15,11 +15,12 @@ import Test from './modules/hooksDemo/TestCompo';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css'
+import PersistentDrawerLeft from './components/Drawer';
 
 const httpLink = createHttpLink({
   uri: 'http://giv-sales-board-dev.centricsoftware.com/buying-board-api-gateway/',
   headers: {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkM2ODMxNjE1IiwidXNlcm5hbWUiOiJnbSIsImZpcnN0TmFtZSI6Ikdsb2JhbCIsImxhc3ROYW1lIjoiTWVyY2hhbmRpc2VyIiwiZW1haWwiOiJyYWVlc2FhLm1ldGthcmlAc3luZXJ6aXAuY29tIiwic2Vzc2lvblVybCI6ImNlbnRyaWM6Ly9TRVNTSU9OL2FkZTcxNGMxYWMxMDY4MmYwMGI0ZGYwNjcyZmQ0NGQxIiwianRpIjoiMWVjYmIyMzAtZWEyYi0xMWU5LWEzZjktMzM4Yjc4NDNkNDIwIiwiY2xpZW50X2lkIjoicG9ydGFsIiwiZXhwIjoxNTcwNjIzODUzLCJpYXQiOjE1NzA1ODA2NTN9.0zrpf-HpAyf1guJMnHjGeaO7EeM3DjXV16k_QkdaPXs"
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkM2ODMxNjE1IiwidXNlcm5hbWUiOiJnbSIsImZpcnN0TmFtZSI6Ikdsb2JhbCIsImxhc3ROYW1lIjoiTWVyY2hhbmRpc2VyIiwiZW1haWwiOiJyYWVlc2FhLm1ldGthcmlAc3luZXJ6aXAuY29tIiwic2Vzc2lvblVybCI6ImNlbnRyaWM6Ly9TRVNTSU9OL2IzYWRiMjIyYWMxMDY4MmYwMGI0ZGYwNmM0MDNjZGQxIiwianRpIjoiYmFkOTUxNTAtZWIwYy0xMWU5LWI3NGEtNTVhY2Q1ZWY3ZGUzIiwiY2xpZW50X2lkIjoicG9ydGFsIiwiZXhwIjoxNTcwNzIwNzUxLCJpYXQiOjE1NzA2Nzc1NTF9.BrnIZNYSPpaoFhoR3_oAcc2RhDcUb84F-WBeevy06cs"
   }
 })
 
@@ -41,8 +42,7 @@ const App: React.FC = () => {
       <ApolloProvider client={client}>
         <Router>
           <div>
-            <Route exact path="/prime" component={TableContainer} />
-            <Route exact path="/" component={WijmoTableContainer} />
+            <Route exact path="/" component={PersistentDrawerLeft} />
           </div>
         </Router>
         <ToastContainer />

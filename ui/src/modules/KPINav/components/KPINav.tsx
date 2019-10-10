@@ -24,17 +24,6 @@ const KPINav = () => {
       store.setSelectedItem(dfs[DEPTH -1]);
     }, [data]);
 
-    // Get rows to stick at top
-    useEffect(() => {
-      if (store.selectedItem) {
-        let stickRows: Array<any> = store.selectedItem.split('=').map((item: string) => {
-          return {
-            'name': item
-          }
-        });
-        store.setStickRows(stickRows);
-      }
-    }, [store.selectedItem]);
     
     const selectionChange = (e: any) => {
       store.setSelectedItem(e.value);
