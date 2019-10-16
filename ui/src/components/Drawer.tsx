@@ -6,9 +6,8 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import KPINav from '../modules/KPINav/components/KPINav';
 import IconButton from '@material-ui/core/IconButton';
-import WijmoTableContainer from '../modules/wijmo-table/component/WijmoContainer';
 import LinearIndeterminate from './Progress';
-import { TreeGridStore, TreeStore } from '../modules/wijmo-table/store/store';
+import ListContainer from '../modules/list-view/components';
 
 const drawerWidth = 300;
 
@@ -60,7 +59,6 @@ export default function PersistentDrawerRight() {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const store: TreeGridStore = TreeStore;
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -79,7 +77,7 @@ export default function PersistentDrawerRight() {
       <main>
         <LinearIndeterminate></LinearIndeterminate>
         <div className={classes.main}>
-          <WijmoTableContainer ></WijmoTableContainer>
+          <ListContainer ></ListContainer>
         </div>
       </main>
       <Drawer

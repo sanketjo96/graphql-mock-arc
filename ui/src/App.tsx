@@ -12,7 +12,7 @@ import { ApolloProvider } from '@apollo/react-hooks';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css'
-import ListContainer from './modules/list-view/components';
+import PersistentDrawerRight from './components/Drawer';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:4444/',
@@ -39,7 +39,7 @@ const App: React.FC = () => {
       <ApolloProvider client={client}>
         <Router>
           <div>
-            <Route exact path="/" component={ListContainer} />
+            <Route exact path="/" component={PersistentDrawerRight} />
           </div>
         </Router>
         <ToastContainer />

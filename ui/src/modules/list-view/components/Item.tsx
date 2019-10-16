@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { ListSubheader, Typography } from '@material-ui/core';
-import { Query, useQuery } from "react-apollo";
+import { ListSubheader } from '@material-ui/core';
+import { useQuery } from "react-apollo";
 import ListRow from './Row';
 import { GET_COLLECTION } from '../../wijmo-table/graphql/collection';
 import _ from 'lodash';
@@ -13,7 +13,7 @@ export interface RowProps {
     style: any
 };
 
-export const Item: React.SFC<RowProps> = ({ data, index, style }) => {
+export const Item: React.SFC<RowProps> = React.memo(({ data, index, style }) => {
     const item = data[index];
     let productList = new Array(item.totalProducts);
     const products = {
@@ -93,4 +93,4 @@ export const Item: React.SFC<RowProps> = ({ data, index, style }) => {
             {getListData()}
         </div>
     );
-}
+})

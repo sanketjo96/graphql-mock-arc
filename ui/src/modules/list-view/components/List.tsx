@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import * as React from 'react';
 import { AutoSizer } from 'react-virtualized';
 import scrollbarSize from 'dom-helpers/scrollbarSize';
@@ -5,15 +7,15 @@ import { VariableSizeList, FixedSizeList } from 'react-window';
 import { makeStyles } from '@material-ui/styles';
 import { Item } from './Item';
 import ListRow from './Row';
+import { ListViewStore } from '../store/ListViewStore';
 
 export const HEADERROWHEIGHT = 40;
 export const CONTENTROWHEIGHT = 40;
 
 const useStyles = makeStyles({
     root: {
-        padding: '2rem',
-        height: '95vh',
-        width: '100vw'
+        height: '90vh',
+        width: '95vw'
     }
 });
 
@@ -22,8 +24,11 @@ export interface CategoryVirtualizedListProps {
 }
 
 const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data }) => {
+    const listStore = ListViewStore;
+    listStore.data = data;
+    listStore.listRef = React.useRef(null);
+
     const classes = useStyles();
-    
     const bodyGrid: any = React.useRef(null);
     const headerGrid: any = React.useRef(null);
 
@@ -38,26 +43,31 @@ const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data
                 headerGrid.current.scrollLeft = e.target.scrollLeft;
             });
         }
-        return () => {
-            bodyGrid.current.removeEventListner("scroll");
-        };
     }, [bodyGrid, headerGrid]);
 
+
     const getItemSize = (index: number): number => {
-        const currentItem = data[index];
-        return (currentItem.headers * HEADERROWHEIGHT) + (CONTENTROWHEIGHT * currentItem.totalProducts);
+        return data[index].itemSize;
     }
 
-    /*
-    const getItemSizeForList = ({ index }: any): number => {
-        const currentItem = data[index];
-        return (currentItem.headers * HEADERROWHEIGHT) + (CONTENTROWHEIGHT * currentItem.totalProducts);
-    }
+    const onScroll = ({ scrollOffset, scrollUpdateWasRequested }: any) => {
+        // Execute below logic only if scroll caused
+        // due to user interaction in the browser and
+        // not due to setting scrollTo() 
+        if (!scrollUpdateWasRequested) {
+            const topCategory = listStore.data.find((item: any) => {
+                return (
+                    item.itemStartInList <= scrollOffset
+                    && item.itemEndInList >= scrollOffset
+                )
+            });
 
-    const getRow = ({ index, style }: any) => {
-        return <Item data={data} index={index} style={style}></Item>
+            if (topCategory) {
+                const item: string = `${topCategory.category.name}=${topCategory.children1.name}=${topCategory.children2.name}`;
+                listStore.setSelectedNavItem(item);
+            }
+        }
     }
-    */
 
     const getHeader = () => {
         return (
@@ -91,6 +101,7 @@ const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data
                             </FixedSizeList>
 
                             <VariableSizeList
+                                ref={listStore.listRef}
                                 outerRef={bodyGrid}
                                 height={height}
                                 width={width}
@@ -98,6 +109,7 @@ const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data
                                 itemData={data}
                                 overscanCount={1}
                                 itemSize={(index: number) => getItemSize(index)}
+                                onScroll={onScroll}
                             >
                                 {Item}
                             </VariableSizeList>
@@ -112,25 +124,3 @@ const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data
 }
 
 export default CategoryVirtualizedList;
-
-/*
-<List
-    height={height}
-    width={width}
-    rowCount={data.length}
-    overscanRowCount={1}
-    rowHeight={getItemSizeForList}
-    rowRenderer={getRow}
-/>
-
-<VariableSizeList
-    height={height}
-    width={width}
-    itemCount={data.length}
-    itemData={data}
-    overscanCount={1}
-    itemSize={(index: number) => getItemSize(index)}
->
-    {Item}
-</VariableSizeList>
-*/
