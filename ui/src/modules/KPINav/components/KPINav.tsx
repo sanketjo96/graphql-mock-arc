@@ -12,7 +12,8 @@ const DEPTH = 3;
 
 const KPINav = () => {
   return useObserver(() => {
-    const store: TreeGridStore = TreeStore;
+    return <div></div>;
+    /*
     const [data, dfs, loading] = useProductHierarchy({
       variables: hierarchyVariable
     });
@@ -45,6 +46,8 @@ const KPINav = () => {
           onToggle={onToggle}/>
       </React.Fragment>
     );
+
+  */
   })
 }
 
