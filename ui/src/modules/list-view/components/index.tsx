@@ -10,7 +10,7 @@ export interface ListContainerProps {
 const ListContainer: React.SFC<ListContainerProps> = () => {
     const [loading, data] = useProductHierarchy({variables: hierarchyVariable});
     if (loading || data.length === 0) return <h6>loading</h6>;
-
+    console.log(data);
     return (
         <CategoryVirtualizedList data={data}></CategoryVirtualizedList>
     );

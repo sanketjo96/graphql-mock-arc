@@ -59,6 +59,28 @@ export const Item: React.SFC<RowProps> = ({ data, index, style }) => {
     products.where.product.AND[1].attributes_some.strVal = item.children1.name;
     products.where.product.AND[2].attributes_some.strVal = item.children2.name;
 
+    const { loading, data: productData } = useQuery(GET_COLLECTION, {
+        variables: products
+    });
+
+
+    const getListData = () => {
+        if (loading && _.isEmpty(productData)) {
+            return (
+                _.map(productList, () => {
+                    return <ListRow key={uuidv4()}></ListRow>
+                })
+            )
+        } else {
+            productList = productData.buyingSessionProductsConnection.edges;
+            return (
+                _.map(productList, (edge: any) => {
+                    return <ListRow key={uuidv4()} item={edge.node.product}></ListRow>
+                })
+            )
+        }
+    }
+
     return (
         <div key={index} style={style}>
             <ListSubheader disableGutters style={{ backgroundColor: 'white' }}>
@@ -68,32 +90,7 @@ export const Item: React.SFC<RowProps> = ({ data, index, style }) => {
                     <ListRow item={item.children2} type="category"></ListRow>
                 </div>
             </ListSubheader>
-            <Query
-                query={GET_COLLECTION}
-                variables={{
-                    ...products
-                }}
-                notifyOnNetworkStatusChange
-            >
-                {
-                    ({ error, loading, data }: any): any => {
-                        if (loading && _.isEmpty(data)) {
-                            return (
-                                _.map(productList, () => {
-                                    return <ListRow key={uuidv4()}></ListRow>
-                                })
-                            )
-                        } else {
-                            productList = data.buyingSessionProductsConnection.edges;
-                            return (
-                                _.map(productList, (edge: any) => {
-                                    return <ListRow key={uuidv4()} item={edge.node.product}></ListRow>
-                                })
-                            )
-                        }
-                    }
-                }
-            </Query>
+            {getListData()}
         </div>
     );
 }

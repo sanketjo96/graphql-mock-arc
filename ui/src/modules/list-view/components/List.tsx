@@ -17,7 +17,6 @@ const useStyles = makeStyles({
     }
 });
 
-
 export interface CategoryVirtualizedListProps {
     data: Array<any>
 }

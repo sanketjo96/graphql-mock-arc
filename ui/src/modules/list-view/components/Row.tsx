@@ -137,7 +137,6 @@ const ListRow: React.SFC<ListRowProps> = React.memo(({ item, type }) => {
                     const previousColWidth = (index - 1 >= 0) ? cols[index - 1].width : 0;
                     style.position = 'sticky';
                     style.left = previousColWidth;
-                    style['z-index'] = 100; 
                 }
 
                 return (
