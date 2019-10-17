@@ -13,6 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css'
 import PersistentDrawerRight from './components/Drawer';
+import TreeListConatiner from './modules/stickyTree/components/Tree';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:4444/',
@@ -39,6 +40,7 @@ const App: React.FC = () => {
         <Router>
           <div>
             <Route exact path="/" component={PersistentDrawerRight} />
+            <Route exact path="/tree" component={TreeListConatiner} />
           </div>
         </Router>
         <ToastContainer />
