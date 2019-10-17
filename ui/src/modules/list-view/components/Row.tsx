@@ -1,78 +1,17 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import * as React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import Skeleton from '@material-ui/lab/Skeleton';
 import _ from 'lodash';
+import { cols, ListViewStore } from '../store/ListViewStore';
+import { useObserver } from 'mobx-react-lite';
 const uuidv4 = require('uuid/v4');
 
 export interface ListRowProps {
     item?: any,
     type?: string
 }
-
-export const cols: Array<any> = [
-    {
-        header: "Category",
-        binding: "name",
-        width: '350px',
-        isFrozen: true,
-        isReadOnly: true
-    },
-    {
-        header: "RM Cluster",
-        binding: "rmcluster",
-        width: '150px',
-        isFrozen: true,
-        isReadOnly: true
-    },
-    {
-        header: "Average Depth",
-        binding: "averageDepth",
-        isReadOnly: false,
-        allowResizing: true
-    },
-    {
-        header: "Mix Quantity",
-        binding: "mixQuantity",
-        isReadOnly: true,
-        allowResizing: true
-    },
-    {
-        header: "Mix Value",
-        binding: "mixValue",
-        isReadOnly: true,
-        allowResizing: true
-    },
-    {
-        header: "Sales Qty",
-        binding: "salesQty",
-        allowResizing: true
-    },
-    {
-        header: "sku Efficiency",
-        binding: "skuEfficiency",
-        allowResizing: true
-    },
-    {
-        header: "Total Products",
-        binding: "totalProducts",
-        allowResizing: true
-    },
-    {
-        header: "Total Quantity",
-        binding: "totalQuantity",
-        allowResizing: true
-    },
-    {
-        header: "Total Stores",
-        binding: "totalStores",
-        allowResizing: true
-    },
-    {
-        header: "Total Value",
-        binding: "totalValue",
-        allowResizing: true
-    }
-];
 
 const useStyles = makeStyles(() => {
     return {
@@ -94,6 +33,7 @@ const useStyles = makeStyles(() => {
         },
         headerCell: {
             color: 'black',
+            // boxShadow: '0px 2px 3px grey',
             height: '40px',
         },
         categoryCell: {
@@ -104,54 +44,61 @@ const useStyles = makeStyles(() => {
         }
     }
 });
-const ListRow: React.SFC<ListRowProps> = React.memo(({ item, type }) => {
-    const classes = useStyles();
-    const cellClass = [classes.cell]
+const ListRow: React.SFC<ListRowProps> = ({ item, type }) => {
+    return useObserver(() => {
+        const classes = useStyles();
+        const cellClass = [classes.cell]
+        const store = ListViewStore;
 
-    switch (type) {
-        case 'head':
-            cellClass.push(classes.headerCell);
-            break;
-        case 'category':
-            cellClass.push(classes.categoryCell);
-            break;
-        default:
-            cellClass.push(classes.contentCell);
-            break;
-    }
+        switch (type) {
+            case 'head':
+                cellClass.push(classes.headerCell);
+                break;
+            case 'category':
+                cellClass.push(classes.categoryCell);
+                break;
+            default:
+                cellClass.push(classes.contentCell);
+                break;
+        }
 
-    return (
-        <div className={classes.listRow}>
-            {_.map(cols, (col, index) => {
-                const style: any = {};
+        return (
+            <div className={classes.listRow}>
+                {_.map(cols, (col, index) => {
+                    if (!col.isFrozen && store.selectedCols.indexOf(col.header) === -1) return;
 
-                // Set cell width
-                if (col.width) {
-                    style.width = col.width;
-                } else {
-                    cellClass.push(classes.defaultWidthCell);
-                }
+                    const style: any = {};
 
-                // set frozen css
-                if (col.isFrozen) {
-                    const previousColWidth = (index - 1 >= 0) ? cols[index - 1].width : 0;
-                    style.position = 'sticky';
-                    style.left = previousColWidth;
-                }
+                    // Set cell width
+                    if (col.width) {
+                        style.width = col.width;
+                    } else {
+                        cellClass.push(classes.defaultWidthCell);
+                    }
 
-                return (
-                    <div key={uuidv4()} style={style} className={cellClass.join(' ')}>
-                        {
-                            (type === 'head')
-                                ? col.header
-                                : item ? item[col.binding] : (
-                                    <Skeleton variant="rect" width={210} height={118} />
-                                )
-                        }
-                    </div>
-                )
-            })}
-        </div>
-    );
-})
+                    // set frozen css
+                    if (col.isFrozen) {
+                        const previousColWidth = (index - 1 >= 0) ? cols[index - 1].width : 0;
+                        style.position = 'sticky';
+                        style.left = previousColWidth;
+                        style.boxShadow = '7px 0 3px -2px #888';
+                    }
+
+                    return (
+                        <div key={uuidv4()} style={style} className={cellClass.join(' ')}>
+                            {
+                                (type === 'head')
+                                    ? col.header
+                                    : item ? item[col.binding] : (
+                                        <Skeleton variant="rect" width={210} height={118} />
+                                    )
+                            }
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    });
+
+}
 export default ListRow;

@@ -13,16 +13,18 @@ const DEPTH = 3;
 const KPINav = () => {
   return useObserver(() => {
     const store = ListViewStore;
-    const [loading, data, navData, dfs] = useProductHierarchy({
+    const [loading, data, navData] = useProductHierarchy({
       variables: hierarchyVariable
     });
 
     // One time store initialization per Data
     useEffect(() => {
-      store.dfs = dfs;
-      store.initExpand(dfs.filter((item: any, index: number) => index < DEPTH));
-      store.setSelectedNavItem(dfs[DEPTH - 1]);
-    }, [navData]);
+      if (data.length) {
+        const initialItem = data[0];
+        const key = `${initialItem.category.name}=${initialItem.children1.name}=${initialItem.children2.name}`;
+        store.setSelectedNavItem(key);
+      }
+    }, [data]);
 
     const selectionChange = (e: any) => {
       store.setSelectedNavItem(e.value, true);
@@ -35,13 +37,16 @@ const KPINav = () => {
     if (navData && !navData.length && loading) return <div>Loading</div>;
     return (
       <React.Fragment>
-        <Tree
+        {
+          store.selectedNavItem && 
+          <Tree
           value={navData}
           selectionMode="single"
           selectionKeys={store.selectedNavItem}
           onSelectionChange={selectionChange}
           expandedKeys={toJS(store.expandedPath)}
           onToggle={onToggle} />
+        }
       </React.Fragment>
     );
   })

@@ -8,10 +8,9 @@ export const CONTENTROWHEIGHT = 40;
 /**
  * Hook for querying user notifications
  */
-export const useProductHierarchy = (options: any = null): [boolean, Array<any>, Array<any>, any] => {
+export const useProductHierarchy = (options: any = null): [boolean, Array<any>, Array<any>] => {
   const [categories, setCategories] = useState([]);
   const [navData, setNavData] = useState([]);
-  const [dfs, setDfs] = useState([]);
   const { loading, error, data: hierarchy } = useQuery(BUYING_SESSION_PRODUCTS_HIERARCHY_KPIS, options);
 
   const getStartPositionWithinList = (result: any) => {
@@ -67,11 +66,11 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
   // and tree to traverse
   useEffect(() => {
     if (!loading && hierarchy) {
-      const dfsTraversal: any = [];
+      // const dfsTraversal: any = [];
       const KPIcategories = hierarchy.buyingSessionProductsKPIs.categories;
       const KPI = KPIcategories.map(function iter(node: any, link: string) {
         if (!node.children) {
-          dfsTraversal.push(`${link}=${node.name}`)
+          // dfsTraversal.push(`${link}=${node.name}`)
           return {
             key: `${link}=${node.name}`,
             label: node.name
@@ -80,7 +79,7 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
 
         if (Array.isArray(node.children)) {
           const rootLink = link ? `${link}=${node.name}` : node.name;
-          dfsTraversal.push(rootLink)
+          // dfsTraversal.push(rootLink)
           return {
             key: rootLink,
             label: node.name,
@@ -89,14 +88,13 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
         }
       });
       setNavData(KPI);
-      setDfs(dfsTraversal)
+      // setDfs(dfsTraversal)
     }
   }, [hierarchy]);
 
   return [
     loading,
     categories,
-    navData,
-    dfs
+    navData
   ]
 }

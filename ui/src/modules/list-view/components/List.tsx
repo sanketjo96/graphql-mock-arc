@@ -14,7 +14,7 @@ export const CONTENTROWHEIGHT = 40;
 
 const useStyles = makeStyles({
     root: {
-        height: '90vh',
+        height: '470px',
         width: '95vw'
     }
 });
@@ -85,16 +85,15 @@ const CategoryVirtualizedList: React.SFC<CategoryVirtualizedListProps> = ({ data
                         <div>
                             <FixedSizeList
                                 outerRef={headerGrid}
-                                height={40}
-                                itemSize={30}
+                                height={42}
+                                itemSize={40}
                                 width={width - scrollbarSize()}
                                 itemCount={1}
                                 overscanCount={0}
                                 style={{
                                     overflowX: 'hidden',
                                     overflowY: 'hidden',
-                                    backgroundColor: 'lightgray',
-                                    borderBottom: `1px solid gray`,
+                                    marginBottom:'2px'
                                 }}
                             >
                                 {getHeader}

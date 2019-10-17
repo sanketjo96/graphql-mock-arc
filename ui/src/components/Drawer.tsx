@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: 'absolute',
     },
     main: {
-      margin: '1rem'
+      margin: '0 1rem 1rem 1rem'
     },
     iconbar: {
       position: 'fixed',
