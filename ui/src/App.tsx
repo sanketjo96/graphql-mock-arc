@@ -18,7 +18,7 @@ import TreeListConatiner from './modules/stickyTree/components/Tree';
 const httpLink = createHttpLink({
   uri: 'http://localhost:4444/',
   headers: {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkM2ODMxNjE1IiwidXNlcm5hbWUiOiJnbSIsImZpcnN0TmFtZSI6Ikdsb2JhbCIsImxhc3ROYW1lIjoiTWVyY2hhbmRpc2VyIiwiZW1haWwiOiJyYWVlc2FhLm1ldGthcmlAc3luZXJ6aXAuY29tIiwic2Vzc2lvblVybCI6ImNlbnRyaWM6Ly9TRVNTSU9OL2Q3ZTgyMjgwYWMxMDY4MmYwMGI0ZGYwNmIyNmE4YTJkIiwianRpIjoiZTU4OWU4YjAtZjA5My0xMWU5LWFiOTgtYjc1MjkzNjkzY2RjIiwiY2xpZW50X2lkIjoicG9ydGFsIiwiZXhwIjoxNTcxMzI4NTYxLCJpYXQiOjE1NzEyODUzNjF9.KcYZ7bRJ_71WClDIWtNgSPHduKXp7ONqRMNNbyN0eyw"  }
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkM2ODMxNjE1IiwidXNlcm5hbWUiOiJnbSIsImZpcnN0TmFtZSI6Ikdsb2JhbCIsImxhc3ROYW1lIjoiTWVyY2hhbmRpc2VyIiwiZW1haWwiOiJyYWVlc2FhLm1ldGthcmlAc3luZXJ6aXAuY29tIiwic2Vzc2lvblVybCI6ImNlbnRyaWM6Ly9TRVNTSU9OL2RkNzViOTFjYWMxMDY4MmYxZGE0OTk0YThkOWY2MjlkIiwianRpIjoiY2UxMmEwODAtZjE2Yy0xMWU5LTkyMDktMTk4NDE4YjllYTYzIiwiY2xpZW50X2lkIjoicG9ydGFsIiwiZXhwIjoxNTcxNDIxNzIyLCJpYXQiOjE1NzEzNzg1MjJ9.RB8-WrQy56o_P97fk8D25d-ujXxvsf8-TrLc47YPqds"  }
 })
 
 const client = new ApolloClient({
@@ -40,7 +40,6 @@ const App: React.FC = () => {
         <Router>
           <div>
             <Route exact path="/" component={PersistentDrawerRight} />
-            <Route exact path="/tree" component={TreeListConatiner} />
           </div>
         </Router>
         <ToastContainer />

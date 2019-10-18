@@ -5,6 +5,7 @@ import ProductRows from "./ProductRow";
 import { AutoSizer } from "react-virtualized";
 import { makeStyles } from "@material-ui/core";
 import { MAXCHILDDEPTH } from "../../../wijmo-table/hooks/TreeHook";
+import { HEADERROWHEIGHT } from "../../../wijmo-table/hooks/hooks";
 
 export interface TreeListProps {
     tree: any;
@@ -18,17 +19,40 @@ const useStyles = makeStyles({
     }
 });
 
+const getStartPositionWithinList = (item: any) => {
+    const previousRowTop = item ? item.itemStartInList : 0;
+    const previousRowHeight = item
+        ? ((item.productheight) ? (item.height + item.productheight) : item.height)
+        : 0
+        ;
+    return previousRowTop + previousRowHeight;
+}
+
+
 const TreeList: React.SFC<TreeListProps> = ({ tree, root }) => {
     const classes = useStyles();
-    tree['HEADER'] = { 
+    const listRef: any = React.useRef(null);
+    tree['HEADER'] = {
         name: 'HEADER',
         depth: 0,
-        children: [root[0].key]
+        children: [root[0].key],
+        height: HEADERROWHEIGHT
     };
+    const treeList = Object.values(tree);
 
-    const getChildren = (id: number) => {
+    let prevoiusNode: any = null;
+    const updateNodeWithStartPosition = (node: any) => {
+        if (!node.itemStartInList) {
+            node.itemStartInList = getStartPositionWithinList(prevoiusNode);
+            node.itemEndInList = (node.itemStartInList + (node.productheight ? (node.height + node.productheight) : node.height))
+            prevoiusNode = node;
+        }
+    }
+
+    const getChildren = (id: string) => {
         if (tree[id] && tree[id].children) {
             if (tree[id].depth <= MAXCHILDDEPTH) {
+                updateNodeWithStartPosition(tree[id]);
                 return tree[id].children.map((childId: number) => ({
                     id: childId,
                     isSticky: true,
@@ -38,6 +62,7 @@ const TreeList: React.SFC<TreeListProps> = ({ tree, root }) => {
                     height: tree[childId].height
                 }))
             }
+            updateNodeWithStartPosition(tree[id]);
             return {
                 id: id,
                 height: tree[id].height
@@ -49,30 +74,55 @@ const TreeList: React.SFC<TreeListProps> = ({ tree, root }) => {
         const node = tree[id];
         if (id === 'HEADER') {
             return (
-                <div style={{ ...style, backgroundColor: 'white' }}>
+                <div style={{ ...style }}>
                     <TreeListRow type='head'></TreeListRow>
                 </div>
             )
         } else if (node.depth <= MAXCHILDDEPTH) {
             return (
-                <div style={{ ...style, backgroundColor: 'white' }}>
+                <div style={{ ...style }}>
                     <TreeListRow item={node} type='category'></TreeListRow>
                 </div>
             )
         } else {
             return (
-                <div style={{ ...style, backgroundColor: 'white' }}>
+                <div style={{ ...style }}>
                     <ProductRows parent={node}></ProductRows>
                 </div>
             )
         }
     };
 
+    const onScroll = ({ scrollTop, scrollReason }: any) => {
+        // Execute below logic only if scroll caused
+        // due to user interaction in the browser and
+        // not due to setting scrollTo() 
+        if (scrollReason === "observed") {
+            const updatedScroll = scrollTop + 120;
+            const topCategory: any = treeList.find((item: any) => {
+                return (
+                    (item.itemStartInList) <= updatedScroll
+                    && (item.itemEndInList) >= updatedScroll
+                )
+            });
+
+            if (topCategory) {
+                // console.log(topCategory.key);
+            }
+        }
+    }
+
+    const scroll = () => {
+        listRef.current.setScrollTop(0);
+    }
+
     return (
         <div className={`${classes.root} list-view`}>
+            <button onClick={scroll}>Scroll</button>
             <AutoSizer>
                 {({ height, width }: any) => {
                     return <StickyTree
+                        ref={listRef}
                         root={{ id: 'HEADER', height: 40, isSticky: true, backgoundColor: 'white', zIndex: 30 }}
                         width={width}
                         height={height}
@@ -80,6 +130,8 @@ const TreeList: React.SFC<TreeListProps> = ({ tree, root }) => {
                         rowRenderer={rowRenderer}
                         renderRoot={true}
                         overscanRowCount={1}
+                        onScroll={onScroll}
+                        wrapAllLeafNodes={true}
                     />
                 }}
             </AutoSizer>

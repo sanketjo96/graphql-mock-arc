@@ -15,54 +15,6 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
   const [navData, setNavData] = useState([]);
   const { loading, error, data: hierarchy } = useQuery(BUYING_SESSION_PRODUCTS_HIERARCHY_KPIS, options);
 
-  const getStartPositionWithinList = (result: any) => {
-    const previousCategory = (result.length) ? result[result.length - 1] : null
-    const previousCategoryStartAt = previousCategory ? previousCategory.itemStartInList : 0;
-    const previousCategorySize = previousCategory ? previousCategory.itemSize : 0;
-    return previousCategoryStartAt + previousCategorySize;
-  }
-
-  useEffect(() => {
-    if (!loading && hierarchy) {
-      let data: any = []
-      hierarchy.buyingSessionProductsKPIs.categories.forEach((category: any) => {
-        // Activity
-        category.children.forEach((children1: any, index: number) => {
-          // Family
-          if (children1.children) {
-            // Line
-            children1.children.forEach((children2: any) => {
-              let object: any = {
-                children1,
-                children2,
-                totalProducts: children2.totalProducts,
-                headers: 3,
-                products: [],
-                itemSize: (3 * HEADERROWHEIGHT) + (CONTENTROWHEIGHT * children2.totalProducts)
-              }
-              object[`category${index}`] = category.name;
-              object.itemStartInList = getStartPositionWithinList(data);
-              object.itemEndInList = object.itemStartInList + object.itemSize;
-              data.push(object)
-            })
-          } else {
-            let object: any = {
-              category,
-              children1,
-              totalProducts: children1.totalProducts,
-              headers: 2,
-              products: [],
-              itemSize: (2 * HEADERROWHEIGHT) + (CONTENTROWHEIGHT * children1.totalProducts)
-            }
-            object.itemStartInList = getStartPositionWithinList(data);
-            object.itemEndInList = object.itemStartInList + object.itemSize;
-            data.push(object)
-          }
-        })
-      });
-      setCategories(data);
-    }
-  }, [hierarchy]);
 
   // Return proccessed data
   // and tree to traverse
@@ -76,6 +28,7 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
           const childKeyArray = key.split("=");
           const childdepth = childKeyArray.length ? (childKeyArray.length) : 1;
           treeListStruct[key] = {
+            key,
             isSticky: true,
             height: HEADERROWHEIGHT,
             ...node,
@@ -91,7 +44,7 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
               depth: MAXCHILDDEPTH + 1
             }
           }
-
+          treeListStruct[key].productheight = (node.totalProducts * CONTENTROWHEIGHT);
           return {
             key,
             label: node.name
@@ -105,11 +58,13 @@ export const useProductHierarchy = (options: any = null): [boolean, Array<any>, 
           const depth = keyArray.length ? (keyArray.length) : 1;
           treeListStruct[rootKey] = {
             ...node,
+            key: rootKey,
             depth,
             isSticky: true,
             height: HEADERROWHEIGHT,
             children: children.map((item: any) => item.key)
           };
+
           return {
             key: rootKey,
             label: node.name,
